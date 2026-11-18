@@ -1,0 +1,680 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Shotlist Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+<style>
+:root{
+  --stage:#eeedf5; --stage-ink:#16151f; --stage-mute:#6b6880; --stage-line:rgba(20,18,40,.08);
+  --bg:#08080d; --bg2:#101019; --ink:#f6f5ff; --mute:#9b99b4; --dim:#64627a;
+  --line:rgba(255,255,255,.08); --card:rgba(255,255,255,.045); --card2:rgba(255,255,255,.08);
+  --violet:#8b5cf6; --pink:#ec4899; --amber:#f59e0b; --ok:#34d399; --warn:#fbbf24; --red:#f87171; --sky:#38bdf8;
+  --grad:linear-gradient(135deg,#8b5cf6 0%,#ec4899 55%,#f59e0b 100%);
+  --r:20px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--stage:#0c0b12;--stage-ink:#efeef8;--stage-mute:#8e8ca6;--stage-line:rgba(255,255,255,.07)}}
+:root[data-theme="dark"]{--stage:#0c0b12;--stage-ink:#efeef8;--stage-mute:#8e8ca6;--stage-line:rgba(255,255,255,.07)}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--stage);color:var(--stage-ink);font-family:"Plus Jakarta Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+svg.lucide{width:18px;height:18px;stroke-width:2}
+
+/* ---------- stage ---------- */
+#stage{min-height:100%;display:flex;align-items:center;justify-content:center;gap:56px;padding:32px 16px}
+.story{width:340px;display:flex;flex-direction:column;gap:22px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:40px;height:40px;border-radius:12px;background:var(--grad);display:grid;place-items:center;color:#fff;box-shadow:0 8px 24px rgba(236,72,153,.35)}
+.brand b{font-size:20px;letter-spacing:-.02em}
+.brand span{display:block;font-size:12px;color:var(--stage-mute)}
+.story h1{font-family:"Instrument Serif",serif;font-weight:400;font-size:44px;line-height:1.02;letter-spacing:-.01em}
+.story h1 i{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.story p.lede{color:var(--stage-mute);font-size:15px;line-height:1.55}
+.steps{display:flex;flex-direction:column;gap:6px}
+.step{display:flex;gap:12px;align-items:center;padding:10px 12px;border-radius:14px;text-align:left;border:1px solid transparent;transition:.2s}
+.step:hover{background:var(--stage-line)}
+.step.on{border-color:var(--stage-line);background:var(--stage-line)}
+.step .n{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-size:12px;font-weight:700;background:var(--stage-line)}
+.step.on .n{background:var(--grad);color:#fff}
+.step b{font-size:14px;display:block}
+.step small{font-size:12px;color:var(--stage-mute)}
+.caption{min-height:64px;font-size:17px;line-height:1.45;font-weight:500;border-left:3px solid var(--pink);padding:4px 0 4px 14px;transition:opacity .3s}
+.foot{font-size:11.5px;color:var(--stage-mute);line-height:1.5}
+
+/* ---------- phone ---------- */
+.phone{width:402px;height:860px;border-radius:62px;padding:10px;background:linear-gradient(145deg,#2a2833,#0d0c12);box-shadow:0 0 0 1.5px #3a3846,0 40px 80px -20px rgba(20,10,50,.55),0 10px 30px rgba(0,0,0,.3);flex-shrink:0;position:relative}
+.screen{width:100%;height:100%;border-radius:52px;overflow:hidden;overflow:clip;background:var(--bg);color:var(--ink);position:relative;isolation:isolate}
+.screen::before{content:"";position:absolute;inset:-30% -30% auto;height:70%;background:radial-gradient(closest-side,rgba(139,92,246,.22),transparent),radial-gradient(closest-side at 80% 40%,rgba(236,72,153,.14),transparent);pointer-events:none;z-index:0}
+.island{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:122px;height:35px;border-radius:20px;background:#000;z-index:60}
+.status{position:absolute;top:0;left:0;right:0;height:54px;display:flex;align-items:center;justify-content:space-between;padding:6px 34px 0;font-size:15px;font-weight:600;z-index:55;background:linear-gradient(#08080d 55%,rgba(8,8,13,0))}
+.status .r{display:flex;gap:6px;align-items:center}
+.status svg.lucide{width:16px;height:16px}
+
+.view{position:absolute;inset:0;padding:62px 0 96px;overflow-y:auto;overflow-x:hidden;opacity:0;pointer-events:none;transform:translateX(18px);transition:opacity .35s ease,transform .35s ease;z-index:1;scrollbar-width:none}
+.view::-webkit-scrollbar{display:none}
+.view.on{opacity:1;pointer-events:auto;transform:none}
+.pad{padding:0 20px}
+.hdr{display:flex;align-items:flex-end;justify-content:space-between;margin:6px 0 18px}
+.hdr small{color:var(--mute);font-size:13px;font-weight:500}
+.hdr h2{font-family:"Instrument Serif",serif;font-weight:400;font-size:40px;line-height:1;letter-spacing:-.01em}
+.avatar{width:38px;height:38px;border-radius:50%;background:var(--grad);display:grid;place-items:center;font-weight:700;font-size:14px;color:#fff}
+.iconbtn{width:38px;height:38px;border-radius:12px;background:var(--card2);display:grid;place-items:center}
+.sec{display:flex;justify-content:space-between;align-items:center;margin:24px 0 12px}
+.sec h3{font-size:15px;font-weight:700;letter-spacing:-.01em;display:flex;gap:8px;align-items:center}
+.sec .count{font-size:11px;font-weight:700;background:var(--grad);color:#fff;border-radius:999px;padding:2px 8px}
+.sec a{font-size:13px;color:var(--mute)}
+.glass{background:var(--card);border:1px solid var(--line);border-radius:var(--r);backdrop-filter:blur(20px)}
+
+/* health */
+.health{padding:18px;display:flex;gap:18px;align-items:center;position:relative;overflow:hidden}
+.health::after{content:"";position:absolute;right:-40px;top:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(closest-side,rgba(245,158,11,.18),transparent)}
+.ring{width:92px;height:92px;flex-shrink:0;position:relative}
+.ring svg{transform:rotate(-90deg)}
+.ring .v{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+.ring .v b{font-size:26px;font-weight:800;letter-spacing:-.03em;display:block;line-height:1}
+.ring .v small{font-size:10px;color:var(--mute)}
+.health h4{font-size:15px;margin-bottom:4px}
+.health p{font-size:12.5px;color:var(--mute);line-height:1.45;margin-bottom:10px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:999px;font-size:13px;font-weight:700}
+.pill.grad{background:var(--grad);color:#fff;box-shadow:0 6px 20px rgba(236,72,153,.3)}
+.pill.soft{background:var(--card2)}
+.pill svg.lucide{width:15px;height:15px}
+
+/* action card */
+.acard{padding:14px;display:flex;gap:14px;margin-bottom:12px;cursor:pointer;transition:transform .2s,border-color .2s}
+.acard:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.16)}
+.thumb{width:62px;height:96px;border-radius:12px;overflow:hidden;flex-shrink:0;background:#222;border:1px solid var(--line)}
+.thumb img{width:100%;height:100%;object-fit:cover;object-position:top}
+.acard .body{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;width:fit-content;letter-spacing:.01em}
+.chip svg.lucide{width:12px;height:12px}
+.acard h5{font-size:14.5px;font-weight:700;line-height:1.25}
+.acard .meta{font-size:12px;color:var(--mute)}
+.conf{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--dim)}
+.conf .bar{flex:1;height:4px;border-radius:9px;background:var(--card2);overflow:hidden}
+.conf .bar i{display:block;height:100%;border-radius:9px;background:var(--grad)}
+.acts{display:flex;gap:8px;margin-top:2px}
+.btn{padding:8px 12px;border-radius:11px;font-size:12.5px;font-weight:700;display:inline-flex;align-items:center;gap:6px}
+.btn.p{background:#fff;color:#0b0b12}
+.btn.g{background:var(--card2);color:var(--ink)}
+.btn svg.lucide{width:14px;height:14px}
+.btn.done{background:rgba(52,211,153,.15);color:var(--ok)}
+
+/* handled rows */
+.row{display:flex;gap:12px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.row .ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex-shrink:0}
+.row .t{flex:1;font-size:13px;line-height:1.35}
+.row .t small{display:block;color:var(--mute);font-size:11.5px}
+.row button{font-size:12px;font-weight:700;color:var(--mute)}
+.coll{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.coll div{padding:12px;border-radius:16px;background:var(--card);border:1px solid var(--line)}
+.coll svg.lucide{width:18px;height:18px;margin-bottom:8px}
+.coll b{display:block;font-size:13px}
+.coll small{font-size:11px;color:var(--mute)}
+
+/* tabbar & fab */
+.tabbar{position:absolute;left:12px;right:12px;bottom:14px;height:68px;border-radius:26px;background:rgba(22,21,32,.82);backdrop-filter:blur(24px);border:1px solid var(--line);display:flex;justify-content:space-around;align-items:center;z-index:40;transition:transform .35s}
+.tabbar.hide{transform:translateY(120px)}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;font-weight:600;color:var(--dim);width:64px;transition:color .2s}
+.tab svg.lucide{width:21px;height:21px}
+.tab.on{color:var(--ink)}
+.tab.on svg.lucide{stroke:url(#g)}
+.fab{position:absolute;right:20px;bottom:96px;z-index:41;height:50px;padding:0 18px 0 14px;border-radius:999px;background:var(--grad);color:#fff;font-weight:700;font-size:13px;display:flex;align-items:center;gap:8px;box-shadow:0 12px 30px rgba(236,72,153,.4);transition:transform .3s,opacity .3s}
+.fab.hide{transform:scale(.6);opacity:0;pointer-events:none}
+
+/* onboarding */
+#v-onboard{padding-top:90px;display:flex;flex-direction:column}
+.orb{width:220px;height:220px;margin:10px auto 26px;border-radius:50%;background:conic-gradient(from 210deg,#8b5cf6,#ec4899,#f59e0b,#8b5cf6);filter:blur(.3px);position:relative;animation:spin 14s linear infinite;box-shadow:0 0 90px rgba(236,72,153,.4)}
+.orb::after{content:"";position:absolute;inset:16px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#2b2140,#0b0a12 70%)}
+.orb-ic{position:absolute;top:150px;left:50%;transform:translateX(-50%);z-index:3;display:flex;gap:10px}
+.orb-ic span{width:52px;height:72px;border-radius:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(8px);display:grid;place-items:center;animation:float 4s ease-in-out infinite}
+.orb-ic span:nth-child(2){animation-delay:-1.3s;transform:translateY(-14px)}
+.orb-ic span:nth-child(3){animation-delay:-2.6s}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes float{50%{translate:0 -8px}}
+.onb h2{font-family:"Instrument Serif",serif;font-weight:400;font-size:42px;line-height:1.02;text-align:center;letter-spacing:-.01em}
+.onb h2 i{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.onb p{text-align:center;color:var(--mute);font-size:14.5px;line-height:1.55;margin:14px 8px 22px}
+.feat{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+.feat div{display:flex;gap:12px;align-items:center;font-size:13.5px;font-weight:500}
+.feat svg.lucide{color:var(--pink)}
+.cta{width:100%;padding:16px;border-radius:18px;background:#fff;color:#0b0b12;font-weight:800;font-size:15px;display:flex;justify-content:center;gap:8px;align-items:center}
+
+/* sheets / overlays */
+.scrim{position:absolute;inset:0;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:.3s;z-index:70}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{position:absolute;left:0;right:0;bottom:0;border-radius:32px 32px 0 0;background:#14131d;border-top:1px solid var(--line);padding:12px 22px 34px;transform:translateY(105%);transition:transform .45s cubic-bezier(.2,.9,.2,1),visibility 0s .45s;visibility:hidden;z-index:80}
+.sheet.on{transform:none;visibility:visible;transition:transform .45s cubic-bezier(.2,.9,.2,1)}
+.grab{width:40px;height:5px;border-radius:9px;background:var(--card2);margin:0 auto 18px}
+.sheet h4{font-size:19px;font-weight:800;margin-bottom:6px;letter-spacing:-.01em}
+.sheet p{color:var(--mute);font-size:13.5px;line-height:1.5;margin-bottom:16px}
+.perm{display:flex;gap:12px;align-items:center;padding:12px;border-radius:14px;background:var(--card);margin-bottom:8px;font-size:13px}
+.perm svg.lucide{color:var(--ok)}
+.flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:90}
+.flash.on{animation:flash .5s ease}
+@keyframes flash{0%{opacity:0}15%{opacity:.85}100%{opacity:0}}
+.shrink{position:absolute;z-index:91;border-radius:14px;overflow:hidden;border:2px solid #fff;box-shadow:0 10px 30px rgba(0,0,0,.5);transition:all .6s cubic-bezier(.3,.8,.3,1);pointer-events:none}
+.shrink img{width:100%;height:100%;object-fit:cover;object-position:top}
+.heads{position:absolute;top:58px;left:12px;right:12px;z-index:85;padding:14px;border-radius:24px;background:rgba(30,28,44,.88);backdrop-filter:blur(30px);border:1px solid rgba(255,255,255,.12);box-shadow:0 20px 40px rgba(0,0,0,.45);transform:translateY(calc(-100% - 90px));visibility:hidden;transition:transform .55s cubic-bezier(.2,1.1,.3,1),visibility 0s .55s}
+.heads.on{transform:none;visibility:visible;transition:transform .55s cubic-bezier(.2,1.1,.3,1)}
+.heads .top{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+.heads .top .ic{width:42px;height:42px;border-radius:13px;background:var(--grad);display:grid;place-items:center;color:#fff;flex-shrink:0}
+.heads b{font-size:14px;display:block}
+.heads small{font-size:12px;color:var(--mute)}
+.heads .acts .btn{flex:1;justify-content:center;padding:10px}
+.toast{position:absolute;left:16px;right:16px;bottom:96px;z-index:86;padding:12px 14px;border-radius:16px;background:#fff;color:#0b0b12;font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;transform:translateY(30px);opacity:0;transition:.35s;pointer-events:none}
+.toast.on{transform:none;opacity:1;pointer-events:auto}
+.toast svg.lucide{color:#059669;flex-shrink:0}
+.toast span{flex:1}
+.toast button{font-weight:800;color:#7c3aed}
+
+/* detail */
+.dtop{display:flex;justify-content:space-between;align-items:center;margin:4px 0 16px}
+.shot{position:relative;width:196px;margin:0 auto;border-radius:18px;overflow:hidden;border:1px solid var(--line);box-shadow:0 20px 50px rgba(0,0,0,.5)}
+.shot img{display:block;width:100%}
+.hl{position:absolute;border:2px solid var(--pink);border-radius:6px;background:rgba(236,72,153,.12);box-shadow:0 0 0 4px rgba(236,72,153,.15);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 8px rgba(236,72,153,.04)}}
+.dtitle{text-align:center;margin:18px 0 4px}
+.dtitle h4{font-size:20px;font-weight:800;letter-spacing:-.02em;margin-top:8px}
+.dtitle p{font-size:13px;color:var(--mute)}
+.fields{padding:4px 14px;margin-top:16px}
+.field{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--line);font-size:13px}
+.field:last-child{border:0}
+.field span{color:var(--mute)}
+.field b{font-weight:700;display:flex;align-items:center;gap:8px}
+.field b svg.lucide{width:14px;height:14px;color:var(--dim);cursor:pointer}
+.why{margin-top:12px;padding:14px;font-size:12.5px;line-height:1.5;color:var(--mute)}
+.why b{color:var(--ink)}
+.bigbtn{width:100%;margin-top:16px;padding:16px;border-radius:18px;background:var(--grad);color:#fff;font-weight:800;font-size:15px;display:flex;justify-content:center;align-items:center;gap:10px;box-shadow:0 14px 30px rgba(236,72,153,.35);transition:.3s}
+.bigbtn.done{background:rgba(52,211,153,.14);color:var(--ok);box-shadow:none}
+.sec2{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.sec2 button{padding:12px 6px;border-radius:14px;background:var(--card);border:1px solid var(--line);font-size:11.5px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:6px}
+.life{display:flex;gap:8px;flex-wrap:wrap}
+.life button{padding:9px 12px;border-radius:12px;background:var(--card);border:1px solid var(--line);font-size:12px;font-weight:600}
+.life button.on{border-color:var(--pink);background:rgba(236,72,153,.12)}
+.lock{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:14px;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.25);font-size:12.5px;line-height:1.45;color:#fde68a;margin-top:12px}
+
+/* sweep */
+.bign{font-size:56px;font-weight:800;letter-spacing:-.05em;line-height:1;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.group{padding:14px;display:flex;gap:14px;align-items:center;margin-bottom:10px;cursor:pointer;transition:.2s}
+.group.off{opacity:.45}
+.stack{position:relative;width:64px;height:64px;flex-shrink:0}
+.stack img{position:absolute;width:40px;height:60px;object-fit:cover;object-position:top;border-radius:8px;border:1.5px solid #14131d}
+.stack img:nth-child(1){left:0;top:4px;transform:rotate(-8deg)}
+.stack img:nth-child(2){left:12px;top:2px}
+.stack img:nth-child(3){left:24px;top:4px;transform:rotate(8deg)}
+.group .t{flex:1}
+.group b{font-size:14px;display:block}
+.group small{font-size:11.5px;color:var(--mute);line-height:1.4;display:block}
+.group .sz{font-size:12px;font-weight:700;color:var(--ink);margin-top:4px}
+.check{width:24px;height:24px;border-radius:8px;border:2px solid var(--dim);display:grid;place-items:center;flex-shrink:0}
+.group:not(.off) .check{background:var(--grad);border:0;color:#fff}
+.check svg.lucide{width:14px;height:14px;opacity:0}
+.group:not(.off) .check svg.lucide{opacity:1}
+.sweepbar{position:sticky;bottom:0;padding-top:12px}
+.celebrate{text-align:center;padding:10px 0}
+.confetti{position:absolute;inset:0;pointer-events:none;z-index:95;overflow:hidden}
+.confetti i{position:absolute;width:8px;height:12px;border-radius:2px;top:-20px;animation:fall 1.8s ease-in forwards}
+@keyframes fall{to{transform:translateY(900px) rotate(540deg);opacity:0}}
+
+/* lab */
+.drop{display:block;padding:20px;text-align:center;border:1.5px dashed rgba(255,255,255,.18);border-radius:20px;cursor:pointer;transition:.2s}
+.drop:hover{border-color:var(--pink);background:rgba(236,72,153,.05)}
+.drop b{display:block;font-size:14px;margin:8px 0 2px}
+.drop small{color:var(--mute);font-size:12px}
+.samples{display:flex;gap:8px;overflow-x:auto;padding:12px 0 4px;scrollbar-width:none}
+.samples button{flex-shrink:0;padding:8px 12px;border-radius:12px;background:var(--card2);font-size:12px;font-weight:600;display:flex;gap:6px;align-items:center}
+.samples button svg.lucide{width:14px;height:14px}
+.pipe{padding:6px 14px;margin-top:14px}
+.ps{display:flex;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line);font-size:13px}
+.ps:last-child{border:0}
+.ps .st{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--card2);flex-shrink:0;color:var(--dim)}
+.ps .st svg.lucide{width:14px;height:14px}
+.ps.run .st{background:rgba(139,92,246,.2);color:var(--violet)}
+.ps.run .st svg.lucide{animation:spin 1s linear infinite}
+.ps.ok .st{background:rgba(52,211,153,.18);color:var(--ok)}
+.ps .tx{flex:1}
+.ps .tx small{display:block;font-size:11px;color:var(--mute);font-family:"JetBrains Mono",monospace}
+.ps .pc{font-size:11px;color:var(--mute);font-family:"JetBrains Mono",monospace}
+.ocr{margin-top:12px;padding:12px;border-radius:14px;background:#05050a;border:1px solid var(--line);font-family:"JetBrains Mono",monospace;font-size:11px;line-height:1.55;color:#c9c7dd;max-height:150px;overflow:auto;white-space:pre-wrap}
+.ents{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.ents span{font-size:11.5px;padding:5px 9px;border-radius:9px;background:var(--card2);font-weight:600}
+.ents span em{font-style:normal;color:var(--mute);font-weight:500;margin-right:4px}
+.result{margin-top:14px;padding:14px;display:flex;gap:12px;align-items:center}
+.note{font-size:11px;color:var(--dim);margin-top:8px;line-height:1.45}
+
+/* settings */
+.set{padding:4px 14px}
+.srow{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);gap:10px}
+.srow:last-child{border:0}
+.srow .l{display:flex;gap:10px;align-items:center;font-size:13.5px;font-weight:600}
+.srow .l small{display:block;font-size:11px;color:var(--mute);font-weight:500}
+.seg{display:flex;background:var(--card2);border-radius:10px;padding:3px}
+.seg button{font-size:11px;font-weight:700;padding:6px 8px;border-radius:8px;color:var(--mute)}
+.seg button.on{background:#fff;color:#0b0b12}
+.tgl{width:46px;height:28px;border-radius:999px;background:var(--card2);position:relative;flex-shrink:0;transition:.25s}
+.tgl::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.25s}
+.tgl.on{background:var(--ok)}
+.tgl.on::after{left:21px}
+
+@media (max-width:900px){.story{display:none}#stage{padding:0}}
+@media (max-width:480px){
+  .phone{width:100vw;height:100dvh;border-radius:0;padding:0;box-shadow:none;background:none}
+  .screen{border-radius:0}
+  .island{display:none}
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8b5cf6"/><stop offset=".55" stop-color="#ec4899"/><stop offset="1" stop-color="#f59e0b"/></linearGradient></defs></svg>
+<div id="stage">
+  <aside class="story">
+    <div class="brand"><div class="logo"><i data-lucide="scan-line"></i></div><div><b>Shotlist</b><span>Screenshots that do their job, then go away</span></div></div>
+    <h1>Every screenshot has a <i>job</i>.</h1>
+    <p class="lede">Shotlist reads each screenshot on your phone, does the task you took it for, and archives it once it's no longer needed. Your gallery stays light.</p>
+    <div class="steps" id="steps"></div>
+    <div class="caption" id="caption">Click a step, or just use the phone.</div>
+    <p class="foot">Live prototype · Model Lab runs real open-source models (Tesseract.js OCR, chrono-node date parsing) in your browser. Sample data is fictional.</p>
+  </aside>
+
+  <div class="phone"><div class="screen" id="screen">
+    <div class="island"></div>
+    <div class="status"><span id="clock">9:41</span><span class="r"><i data-lucide="signal"></i><i data-lucide="wifi"></i><i data-lucide="battery-full"></i></span></div>
+
+    <!-- ONBOARD -->
+    <section class="view on" id="v-onboard"><div class="pad onb">
+      <div style="position:relative"><div class="orb"></div>
+        <div class="orb-ic"><span><i data-lucide="ticket"></i></span><span><i data-lucide="receipt"></i></span><span><i data-lucide="key-round"></i></span></div></div>
+      <h2>Your screenshots,<br><i>finally useful.</i></h2>
+      <p>Shotlist works out why you took each screenshot, then does it for you. Add the trip, remind you about the bill, copy the code. When the task is done, the screenshot is archived.</p>
+      <div class="feat">
+        <div><i data-lucide="zap"></i>Turns screenshots into actions in one tap</div>
+        <div><i data-lucide="sparkles"></i>Weekly sweep keeps your gallery light</div>
+        <div><i data-lucide="shield-check"></i>Runs on your phone. Nothing is uploaded</div>
+      </div>
+      <button class="cta" data-go="perm">Get started <i data-lucide="arrow-right"></i></button>
+    </div></section>
+
+    <!-- HOME -->
+    <section class="view" id="v-home"><div class="pad">
+      <div class="hdr"><div><small>Wednesday, 18 Nov</small><h2>Today</h2></div><div class="avatar">RK</div></div>
+      <div class="glass health" id="health">
+        <div class="ring" id="ring"></div>
+        <div style="position:relative;z-index:1"><h4>Gallery health</h4><p id="healthTxt">1,284 screenshots · 3.1 GB<br><b style="color:#fbbf24">742</b> have already done their job</p>
+        <button class="pill grad" data-tab="sweep"><i data-lucide="sparkles"></i>Start sweep</button></div>
+      </div>
+      <div class="sec"><h3>Needs you <span class="count" id="needCount">3</span></h3><a>Swipe to skip</a></div>
+      <div id="needs"></div>
+      <div class="sec"><h3>Handled for you</h3><a>Last 24h</a></div>
+      <div class="glass" id="handled"></div>
+      <div class="sec"><h3>Collections</h3><a>See all</a></div>
+      <div class="coll">
+        <div><i data-lucide="train-front" style="color:#38bdf8"></i><b>Trips</b><small id="cTrips">3 active</small></div>
+        <div><i data-lucide="receipt" style="color:#34d399"></i><b>Bills</b><small>2 due</small></div>
+        <div><i data-lucide="heart" style="color:#ec4899"></i><b>Wishlist</b><small>12 tracked</small></div>
+        <div><i data-lucide="chef-hat" style="color:#f59e0b"></i><b>Recipes</b><small>9 saved</small></div>
+        <div><i data-lucide="calendar-days" style="color:#8b5cf6"></i><b>Events</b><small>3 upcoming</small></div>
+        <div><i data-lucide="notebook-pen" style="color:#9b99b4"></i><b>Notes</b><small>31 texts</small></div>
+      </div>
+    </div></section>
+
+    <!-- DETAIL -->
+    <section class="view" id="v-detail"><div class="pad" id="detail"></div></section>
+
+    <!-- SWEEP -->
+    <section class="view" id="v-sweep"><div class="pad" id="sweep"></div></section>
+
+    <!-- LAB -->
+    <section class="view" id="v-lab"><div class="pad">
+      <div class="hdr"><div><small>Runs on this device</small><h2>Model Lab</h2></div><div class="iconbtn"><i data-lucide="cpu"></i></div></div>
+      <label class="drop glass" id="drop"><input type="file" accept="image/*" id="file" hidden>
+        <i data-lucide="image-up" style="width:26px;height:26px;color:var(--pink)"></i><b>Try your own screenshot</b><small>Read and classified in this browser. Not uploaded anywhere.</small></label>
+      <div class="samples" id="samples"></div>
+      <div id="labOut"></div>
+    </div></section>
+
+    <!-- SETTINGS -->
+    <section class="view" id="v-settings"><div class="pad">
+      <div class="hdr"><div><small>You're in control</small><h2>Autonomy</h2></div><div class="iconbtn"><i data-lucide="sliders-horizontal"></i></div></div>
+      <p style="font-size:13px;color:var(--mute);line-height:1.5;margin-bottom:14px">Choose how much Shotlist can do without asking. Even on <b style="color:var(--ink)">Auto</b>, it only acts when it's at least 85% confident, and every action can be undone.</p>
+      <div class="glass set" id="auto"></div>
+      <div class="sec"><h3>Privacy & safety</h3></div>
+      <div class="glass set">
+        <div class="srow"><div class="l"><i data-lucide="cpu"></i><div>On-device processing<small>OCR and AI run on the phone, never in the cloud</small></div></div><button class="tgl on"></button></div>
+        <div class="srow"><div class="l"><i data-lucide="shield-alert"></i><div>Sensitive guard<small>Bank, ID and password screenshots are never acted on automatically</small></div></div><button class="tgl on"></button></div>
+        <div class="srow"><div class="l"><i data-lucide="archive-restore"></i><div>Soft archive<small>Swept screenshots can be restored for 30 days</small></div></div><button class="tgl on"></button></div>
+        <div class="srow"><div class="l"><i data-lucide="calendar-clock"></i><div>Weekly sweep<small>Sundays at 7:00 PM</small></div></div><button class="tgl on"></button></div>
+      </div>
+      <div style="height:20px"></div>
+    </div></section>
+
+    <button class="fab hide" id="fab"><i data-lucide="camera"></i>Simulate screenshot</button>
+
+    <nav class="tabbar hide" id="tabbar">
+      <button class="tab on" data-tab="home"><i data-lucide="layers"></i>Today</button>
+      <button class="tab" data-tab="sweep"><i data-lucide="sparkles"></i>Sweep</button>
+      <button class="tab" data-tab="lab"><i data-lucide="scan-text"></i>Lab</button>
+      <button class="tab" data-tab="settings"><i data-lucide="sliders-horizontal"></i>Autonomy</button>
+    </nav>
+
+    <div class="heads" id="heads"></div>
+    <div class="toast" id="toast"><i data-lucide="circle-check"></i><span id="toastTxt"></span><button id="undo">Undo</button></div>
+    <div class="scrim" id="scrim"></div>
+    <div class="sheet" id="sheet"></div>
+    <div class="flash" id="flash"></div>
+    <div class="confetti" id="confetti"></div>
+  </div></div>
+</div>
+
+<script>
+/* ================= sample screenshots (fictional data, drawn as SVG) ================= */
+const W=360,H=720;
+const T=(x,y,s,txt,o={})=>`<text x="${x}" y="${y}" font-family="Arial,Helvetica,sans-serif" font-size="${s}" font-weight="${o.b?700:400}" fill="${o.c||'#111'}" ${o.a?`text-anchor="${o.a}"`:''}>${txt}</text>`;
+const wrap=(bg,inner)=>`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}"><rect width="${W}" height="${H}" fill="${bg}"/>${inner}</svg>`;
+const SVGS={
+ticket:wrap('#f3f5fb',`<rect y="40" width="360" height="70" fill="#1e3a8a"/>${T(20,84,24,'RailGo',{b:1,c:'#fff'})}${T(340,84,15,'e-Ticket',{c:'#c7d2fe',a:'end'})}
+<rect x="16" y="126" width="328" height="420" rx="16" fill="#fff" stroke="#e5e7eb"/>
+${T(32,162,20,'PNR 4521873390',{b:1})}${T(32,186,13,'Booked · Confirmed',{c:'#059669'})}
+${T(32,232,16,'CHENNAI CENTRAL (MAS)',{b:1})}${T(32,262,28,'06:00',{b:1,c:'#1e3a8a'})}
+${T(32,296,14,'5h 05m · Express 12607',{c:'#6b7280'})}
+${T(32,334,16,'KSR BENGALURU (SBC)',{b:1})}${T(32,364,28,'11:05',{b:1,c:'#1e3a8a'})}
+${T(32,410,17,'Date: 22 Nov 2026',{b:1})}${T(32,440,15,'Coach C2 · Seat 41 · Chair Car')}${T(32,470,15,'Passenger: R. Kumar')}${T(32,500,15,'Fare: Rs 1,135')}
+<g fill="#111">${Array.from({length:36},(_,i)=>`<rect x="${250+(i%6)*12}" y="${410+Math.floor(i/6)*12}" width="${(i*7)%3?10:0}" height="10"/>`).join('')}</g>`),
+bill:wrap('#ffffff',`<rect y="40" width="360" height="70" fill="#047857"/>${T(20,84,22,'BrightGrid Power',{b:1,c:'#fff'})}
+${T(24,150,20,'Electricity Bill - Nov 2026',{b:1})}${T(24,180,14,'Consumer No. 0941 2287 551',{c:'#6b7280'})}
+<rect x="16" y="204" width="328" height="150" rx="16" fill="#ecfdf5"/>${T(32,240,15,'Amount due',{c:'#065f46'})}${T(32,290,40,'Rs 1,284.00',{b:1,c:'#065f46'})}${T(32,330,16,'Due date: 25 Nov 2026',{b:1,c:'#b91c1c'})}
+${T(24,396,15,'Units used: 214 kWh')}${T(24,424,15,'Billing period: 15 Oct - 14 Nov')}${T(24,452,15,'Last payment: Rs 1,102 on 20 Oct')}
+<rect x="16" y="600" width="328" height="56" rx="14" fill="#047857"/>${T(180,635,18,'Pay now',{b:1,c:'#fff',a:'middle'})}`),
+otp:wrap('#ffffff',`${T(180,70,15,'AX-NEOBNK',{b:1,a:'middle'})}${T(180,90,12,'Text Message · Today 9:41 PM',{c:'#6b7280',a:'middle'})}
+<rect x="16" y="120" width="300" height="150" rx="20" fill="#e5e7eb"/>${T(32,156,16,'Your OTP for NeoBank login')}${T(32,182,16,'is 482913. Valid for 10')}${T(32,208,16,'minutes. Do not share it')}${T(32,234,16,'with anyone.')}
+<rect x="16" y="650" width="328" height="44" rx="22" fill="#f3f4f6"/>${T(36,678,14,'Text Message',{c:'#9ca3af'})}`),
+shop:wrap('#ffffff',`${T(20,70,22,'Kartly',{b:1,c:'#7c3aed'})}<rect x="16" y="90" width="328" height="250" rx="18" fill="#f5f3ff"/>
+<circle cx="180" cy="200" r="70" fill="none" stroke="#1f2937" stroke-width="16"/><rect x="96" y="190" width="34" height="70" rx="14" fill="#1f2937"/><rect x="230" y="190" width="34" height="70" rx="14" fill="#1f2937"/>
+${T(20,380,19,'AeroSound ANC Headphones',{b:1})}${T(20,404,14,'4.4 stars · 2,318 ratings',{c:'#6b7280'})}${T(20,452,34,'Rs 4,999',{b:1})}${T(20,480,15,'MRP Rs 7,499 · 33% off',{c:'#059669'})}${T(20,512,14,'Deal ends in 2 days',{c:'#b91c1c',b:1})}
+<rect x="16" y="600" width="156" height="54" rx="14" fill="#ede9fe"/>${T(94,633,16,'Add to cart',{b:1,c:'#7c3aed',a:'middle'})}<rect x="188" y="600" width="156" height="54" rx="14" fill="#7c3aed"/>${T(266,633,16,'Buy now',{b:1,c:'#fff',a:'middle'})}`),
+event:wrap('#1b1033',`<defs><linearGradient id="e" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c3aed"/><stop offset="1" stop-color="#db2777"/></linearGradient></defs><rect x="16" y="60" width="328" height="600" rx="24" fill="url(#e)"/>
+${T(40,140,40,'DESIGN',{b:1,c:'#fff'})}${T(40,186,40,'MEETUP',{b:1,c:'#fff'})}${T(40,226,16,'Chennai Product Circle',{c:'#fbcfe8'})}
+<circle cx="270" cy="330" r="60" fill="#fff" opacity=".15"/><circle cx="230" cy="380" r="40" fill="#fff" opacity=".12"/>
+${T(40,470,18,'Sat, 29 Nov 2026',{b:1,c:'#fff'})}${T(40,500,18,'5:00 PM onwards',{b:1,c:'#fff'})}${T(40,540,15,'Hall B, Tidel Park',{c:'#fce7f3'})}${T(40,610,14,'Register: pcircle.in/meetup',{c:'#fce7f3'})}`),
+recipe:wrap('#fffbeb',`<rect x="0" y="40" width="360" height="160" fill="#f59e0b"/><circle cx="180" cy="120" r="56" fill="#fde68a"/><circle cx="180" cy="120" r="38" fill="#ea580c"/>
+${T(20,240,22,'Paneer Butter Masala',{b:1})}${T(20,266,14,'Serves 4 · 35 min',{c:'#92400e'})}${T(20,306,17,'Ingredients',{b:1})}
+${T(20,336,15,'250 g paneer')}${T(20,362,15,'2 tbsp butter')}${T(20,388,15,'1 cup tomato puree')}${T(20,414,15,'1/2 cup fresh cream')}${T(20,440,15,'1 tsp garam masala')}${T(20,466,15,'1 tsp kasuri methi')}
+${T(20,506,17,'Method',{b:1})}${T(20,534,14,'1. Melt butter, add tomato puree.')}${T(20,558,14,'2. Simmer 10 min, add spices.')}${T(20,582,14,'3. Stir in cream and paneer.')}`),
+meme:wrap('#0f0f14',`<rect x="0" y="140" width="360" height="420" fill="#27272a"/><circle cx="180" cy="330" r="80" fill="#3f3f46"/><circle cx="155" cy="315" r="10" fill="#fafafa"/><circle cx="205" cy="315" r="10" fill="#fafafa"/><path d="M150 370 q30 -24 60 0" stroke="#fafafa" stroke-width="6" fill="none"/>
+${T(180,190,26,'ME AT 11:58 PM',{b:1,c:'#fff',a:'middle'})}${T(180,530,22,'SUBMITTING THE DECK',{b:1,c:'#fff',a:'middle'})}`)
+};
+const IMG={};for(const k in SVGS)IMG[k]='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(SVGS[k]);
+
+/* intent catalogue */
+const KIND={
+ ticket:{label:'Trip',icon:'train-front',col:'#38bdf8',action:'Add trip to calendar',actIcon:'calendar-plus',done:'Added to Calendar',life:['Until trip ends · 23 Nov','30 days','Keep forever'],kw:['pnr','ticket','coach','seat','boarding','departure','express','train','flight','gate','passenger','fare','chair car']},
+ bill:{label:'Bill',icon:'receipt',col:'#34d399',action:'Remind me on 23 Nov',actIcon:'bell-plus',done:'Reminder set · 23 Nov',life:['Until paid + 3 days','Next bill','Keep forever'],kw:['amount due','due date','bill','consumer','units','billing period','pay now','invoice','payable']},
+ otp:{label:'Code',icon:'key-round',col:'#fbbf24',action:'Copy code',actIcon:'copy',done:'Copied · expires 9:51 PM',life:['10 minutes','1 day'],kw:['otp','one time','verification','code','valid for','do not share']},
+ shop:{label:'Wishlist',icon:'heart',col:'#ec4899',action:'Track price drop',actIcon:'trending-down',done:'Tracking · alert under Rs 4,500',life:['Until bought','30 days','Keep forever'],kw:['add to cart','buy now','mrp','off','deal','ratings','price']},
+ event:{label:'Event',icon:'calendar-days',col:'#8b5cf6',action:'Save event + RSVP link',actIcon:'calendar-check',done:'Saved to Events · 29 Nov',life:['Until event ends','Keep forever'],kw:['meetup','register','hall','onwards','event','rsvp','venue','workshop']},
+ recipe:{label:'Recipe',icon:'chef-hat',col:'#f59e0b',action:'Add 6 items to grocery list',actIcon:'shopping-basket',done:'Added to grocery list',life:['Move to Recipes','Keep forever'],kw:['ingredients','tbsp','tsp','cup','method','serves','min','simmer']},
+ meme:{label:'Meme',icon:'smile',col:'#9b99b4',action:'Keep best, archive 4 copies',actIcon:'copy-minus',done:'Duplicates archived',life:['Keep 1 copy'],kw:['me at','when','pm']},
+ note:{label:'Note',icon:'notebook-pen',col:'#9b99b4',action:'Save text as note',actIcon:'clipboard-copy',done:'Saved to Notes',life:['30 days','Keep forever'],kw:[]}
+};
+const SENSITIVE=/(bank|otp|password|cvv|card no|aadhaar|pan no|account no|ifsc)/i;
+
+/* demo items */
+const ITEMS={
+ bill:{kind:'bill',title:'Electricity bill · Rs 1,284',meta:'BrightGrid Power · due Wed, 25 Nov',conf:.88,status:'needs',
+   fields:[['Amount','Rs 1,284.00'],['Due','25 Nov 2026'],['Consumer no.','0941 2287 551'],['Biller','BrightGrid Power']],
+   why:'Found <b>Amount due</b>, <b>Due date</b> and a <b>consumer number</b>. Bills are set to <b>Suggest</b>, so Shotlist asks you first.',
+   hl:[[16,204,328,150]]},
+ shop:{kind:'shop',title:'AeroSound ANC Headphones',meta:'Kartly · Rs 4,999 (33% off) · deal ends in 2 days',conf:.79,status:'needs',
+   fields:[['Price','Rs 4,999'],['MRP','Rs 7,499'],['Store','Kartly'],['Deal ends','20 Nov 2026']],
+   why:'Found <b>Buy now</b>, a <b>price</b> and a <b>discount</b>. It looks like you were thinking about buying this.',
+   hl:[[14,420,200,100]]},
+ event:{kind:'event',title:'Design Meetup · Chennai Product Circle',meta:'Sat, 29 Nov · 5:00 PM · Hall B, Tidel Park',conf:.67,status:'needs',
+   fields:[['When','29 Nov 2026, 5:00 PM'],['Where','Hall B, Tidel Park'],['Link','pcircle.in/meetup']],
+   why:'Found a <b>date</b>, a <b>time</b>, a <b>venue</b> and a <b>register link</b>. Confidence is 67%, which is below the auto-act threshold, so Shotlist asks.',
+   hl:[[30,448,260,60],[30,590,270,30]]},
+ otp:{kind:'otp',title:'NeoBank login code 482913',meta:'Copied when captured · expired 9:51 PM',conf:.97,status:'auto',sensitive:true,
+   fields:[['Code','482913'],['Valid for','10 minutes'],['Sender','AX-NEOBNK']],
+   why:'A <b>bank code</b>. Sensitive guard is on, so it was copied to your clipboard only. It was never shared and is archived after 10 minutes.',hl:[[28,165,200,26]]},
+ meme:{kind:'meme',title:'5 copies of the same meme',meta:'Kept the sharpest copy · 4 archived',conf:.94,status:'auto',
+   fields:[['Copies','5'],['Space saved','3.6 MB']],why:'Five screenshots look almost <b>identical</b> (98.7% similar). Shotlist kept the sharpest one.',hl:[]},
+ ticket:{kind:'ticket',title:'Chennai → Bengaluru · Express 12607',meta:'Sun, 22 Nov · 06:00 · Coach C2, Seat 41',conf:.96,status:'new',
+   fields:[['PNR','4521873390'],['Departs','22 Nov, 06:00 · MAS'],['Arrives','11:05 · SBC'],['Seat','C2 · 41']],
+   why:'Found a <b>PNR</b>, <b>coach and seat</b>, and <b>departure and arrival times</b>. Confidence is 96%.',
+   hl:[[24,142,230,28],[24,392,240,28]]},
+ recipe:{kind:'recipe',title:'Paneer Butter Masala',meta:'6 ingredients · serves 4',conf:.91,status:'lab',fields:[],why:'',hl:[]}
+};
+const SAMPLE_TEXT={ticket:'RailGo e-Ticket\nPNR 4521873390\nBooked · Confirmed\nCHENNAI CENTRAL (MAS) 06:00\n5h 05m · Express 12607\nKSR BENGALURU (SBC) 11:05\nDate: 22 Nov 2026\nCoach C2 · Seat 41 · Chair Car\nPassenger: R. Kumar\nFare: Rs 1,135',bill:'BrightGrid Power\nElectricity Bill - Nov 2026\nConsumer No. 0941 2287 551\nAmount due\nRs 1,284.00\nDue date: 25 Nov 2026\nUnits used: 214 kWh\nPay now',otp:'AX-NEOBNK\nYour OTP for NeoBank login is 482913. Valid for 10 minutes. Do not share it with anyone.',shop:'Kartly\nAeroSound ANC Headphones\nRs 4,999\nMRP Rs 7,499 · 33% off\nDeal ends in 2 days\nAdd to cart  Buy now',event:'DESIGN MEETUP\nChennai Product Circle\nSat, 29 Nov 2026\n5:00 PM onwards\nHall B, Tidel Park\nRegister: pcircle.in/meetup',recipe:'Paneer Butter Masala\nServes 4 · 35 min\nIngredients\n250 g paneer\n2 tbsp butter\n1 cup tomato puree\n1/2 cup fresh cream\n1 tsp garam masala\n1 tsp kasuri methi\nMethod\n1. Melt butter, add tomato puree.',meme:'ME AT 11:58 PM\nSUBMITTING THE DECK'};
+
+/* ================= helpers ================= */
+const $=s=>document.querySelector(s);
+const icons=()=>{try{lucide.createIcons()}catch(e){}};
+let undoFn=null,toastT;
+function toast(txt,undo){$('#toastTxt').innerHTML=txt;undoFn=undo||null;$('#undo').style.display=undo?'':'none';const t=$('#toast');t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),3800)}
+$('#undo').onclick=()=>{undoFn&&undoFn();$('#toast').classList.remove('on')};
+function chip(k){const c=KIND[k];return `<span class="chip" style="background:${c.col}22;color:${c.col}"><i data-lucide="${c.icon}"></i>${c.label}</span>`}
+function confBar(c){return `<div class="conf"><span>${Math.round(c*100)}% sure</span><div class="bar"><i style="width:${c*100}%"></i></div></div>`}
+
+/* ================= navigation ================= */
+let current='onboard',prevView='home';
+function show(v){
+  document.querySelectorAll('.view').forEach(x=>x.classList.toggle('on',x.id==='v-'+v));
+  const app=!['onboard'].includes(v);
+  $('#tabbar').classList.toggle('hide',!app||v==='detail');
+  $('#fab').classList.toggle('hide',v!=='home');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.tab===v));
+  if(v!=='detail')prevView=v;
+  current=v;$('#v-'+v).scrollTop=0;
+  const map={onboard:0,home:1,detail:2,sweep:3,lab:4,settings:5};markStep(map[v]);
+}
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-tab]');if(t){if(t.dataset.tab==='sweep')renderSweep();show(t.dataset.tab)}
+  const g=e.target.closest('[data-go]');if(g&&g.dataset.go==='perm')openPerm();
+});
+
+/* ================= onboarding / permission ================= */
+function openPerm(){
+  $('#sheet').innerHTML=`<div class="grab"></div><h4>Let Shotlist see your Screenshots folder</h4><p>Only screenshots. Not your photos, chats or camera roll. Everything is processed on this phone.</p>
+  <div class="perm"><i data-lucide="folder-check"></i>Screenshots folder only (1,284 items)</div>
+  <div class="perm"><i data-lucide="cpu"></i>On-device OCR and intent model (38 MB)</div>
+  <div class="perm"><i data-lucide="bell-ring"></i>A gentle nudge right after you take a screenshot</div>
+  <button class="cta" id="allow" style="margin-top:12px">Allow screenshots access</button>
+  <button style="width:100%;padding:14px;color:var(--mute);font-size:13px;font-weight:600">Not now</button>`;
+  icons();sheet(true);
+  $('#allow').onclick=()=>{sheet(false);show('home');setCaption('Home shows a <b>Gallery health</b> score, the screenshots that <b>need you</b>, and what was <b>handled automatically</b>.')};
+}
+function sheet(on){$('#sheet').classList.toggle('on',on);$('#scrim').classList.toggle('on',on)}
+$('#scrim').onclick=()=>sheet(false);
+
+/* ================= home ================= */
+let health=62;
+function ring(score,el){
+  const r=40,c=2*Math.PI*r;el.innerHTML=`<svg width="92" height="92"><circle cx="46" cy="46" r="${r}" stroke="rgba(255,255,255,.08)" stroke-width="9" fill="none"/><circle id="rc" cx="46" cy="46" r="${r}" stroke="url(#g)" stroke-width="9" fill="none" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c*(1-score/100)}" style="transition:stroke-dashoffset 1.4s cubic-bezier(.2,.8,.2,1)"/></svg><div class="v"><div><b id="rv">${score}</b><small>/ 100</small></div></div>`;
+}
+function animateRing(to){const c=2*Math.PI*40;const rc=$('#rc');if(rc)rc.style.strokeDashoffset=c*(1-to/100);let v=health;const st=setInterval(()=>{v+=Math.sign(to-v);$('#rv')&&($('#rv').textContent=v);if(v===to)clearInterval(st)},30);health=to}
+function renderHome(){
+  ring(health,$('#ring'));
+  const needs=Object.entries(ITEMS).filter(([k,i])=>i.status==='needs');
+  $('#needCount').textContent=needs.length;
+  $('#needs').innerHTML=needs.length?needs.map(([k,i])=>{const K=KIND[i.kind];return `<div class="glass acard" data-open="${k}">
+   <div class="thumb"><img src="${IMG[i.kind]}" alt=""></div>
+   <div class="body">${chip(i.kind)}<h5>${i.title}</h5><div class="meta">${i.meta}</div>${confBar(i.conf)}
+   <div class="acts"><button class="btn p" data-do="${k}"><i data-lucide="${K.actIcon}"></i>${K.action}</button><button class="btn g" data-skip="${k}">Later</button></div></div></div>`}).join('')
+   :`<div class="glass" style="padding:22px;text-align:center;font-size:13px;color:var(--mute)"><i data-lucide="party-popper" style="color:var(--amber)"></i><br>All caught up. No screenshot is waiting on you.</div>`;
+  const handled=Object.entries(ITEMS).filter(([k,i])=>i.status==='auto'||i.status==='done');
+  $('#handled').innerHTML=handled.reverse().map(([k,i])=>{const K=KIND[i.kind];return `<div class="row" data-open="${k}"><div class="ic" style="background:${K.col}22;color:${K.col}"><i data-lucide="${K.icon}"></i></div><div class="t">${i.status==='done'?K.done:i.title}<small>${i.status==='done'?i.title:i.meta}</small></div><button data-undo="${k}">${i.status==='done'?'Undo':'View'}</button></div>`}).join('');
+  icons();
+}
+document.addEventListener('click',e=>{
+  const d=e.target.closest('[data-do]');if(d){e.stopPropagation();doAction(d.dataset.do);return}
+  const s=e.target.closest('[data-skip]');if(s){e.stopPropagation();const k=s.dataset.skip;ITEMS[k].status='later';renderHome();toast('Snoozed. It will come back in tonight\'s digest.',()=>{ITEMS[k].status='needs';renderHome()});return}
+  const u=e.target.closest('[data-undo]');if(u){e.stopPropagation();const k=u.dataset.undo;if(ITEMS[k].status==='done'){ITEMS[k].status=ITEMS[k].prev||'needs';renderHome();toast('Action undone.')}else openDetail(k);return}
+  const o=e.target.closest('[data-open]');if(o)openDetail(o.dataset.open);
+});
+function doAction(k){
+  const i=ITEMS[k],K=KIND[i.kind];i.prev=i.status;i.status='done';renderHome();
+  toast(`<b>${K.done}</b> · auto-archives when done`,()=>{i.status=i.prev;renderHome();if(current==='detail')openDetail(k)});
+  if(current==='detail'){const b=$('#bigbtn');b.classList.add('done');b.innerHTML=`<i data-lucide="check"></i>${K.done}`;icons()}
+}
+
+/* ================= detail ================= */
+function openDetail(k){
+  const i=ITEMS[k],K=KIND[i.kind];
+  const done=i.status==='done';
+  $('#detail').innerHTML=`<div class="dtop"><button class="iconbtn" id="back"><i data-lucide="chevron-left"></i></button><small style="color:var(--mute);font-weight:600;font-size:13px">Screenshot · today</small><button class="iconbtn"><i data-lucide="more-horizontal"></i></button></div>
+   <div class="shot"><img src="${IMG[i.kind]}" alt="">${i.hl.map(h=>`<div class="hl" style="left:${h[0]/W*100}%;top:${h[1]/H*100}%;width:${h[2]/W*100}%;height:${h[3]/H*100}%"></div>`).join('')}</div>
+   <div class="dtitle">${chip(i.kind)}<h4>${i.title}</h4><p>${i.meta}</p></div>
+   <button class="bigbtn ${done?'done':''}" id="bigbtn" ${i.sensitive?'':`data-do="${k}"`}><i data-lucide="${done?'check':K.actIcon}"></i>${done?K.done:K.action}</button>
+   ${i.sensitive?`<div class="lock"><i data-lucide="shield-alert"></i><div><b>Sensitive guard is on.</b> This code was only copied to your clipboard. It is never shared or synced, and it expires in 10 minutes.</div></div>`:''}
+   <div class="sec2"><button><i data-lucide="folder-plus"></i>Add to ${K.label}s</button><button><i data-lucide="text-select"></i>Copy text</button><button><i data-lucide="share-2"></i>Share</button></div>
+   <div class="glass fields">${i.fields.map(f=>`<div class="field"><span>${f[0]}</span><b>${f[1]}<i data-lucide="copy"></i></b></div>`).join('')}</div>
+   <div class="glass why"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><b>Why Shotlist thinks this</b><span>${Math.round(i.conf*100)}%</span></div>${i.why}</div>
+   <div class="sec"><h3><i data-lucide="hourglass" style="width:16px"></i>Lifespan</h3><a>When it's done</a></div>
+   <div class="life">${K.life.map((l,n)=>`<button class="${n?'':'on'}">${l}</button>`).join('')}</div><div style="height:30px"></div>`;
+  icons();show('detail');
+  $('#back').onclick=()=>show(prevView);
+  document.querySelectorAll('.life button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.life button').forEach(x=>x.classList.remove('on'));b.classList.add('on');toast(`Lifespan set: <b>${b.textContent}</b>`)});
+}
+
+/* ================= capture simulation ================= */
+function capture(){
+  if(current!=='home')show('home');
+  const scr=$('#screen'),f=$('#flash');f.classList.remove('on');void f.offsetWidth;f.classList.add('on');
+  const s=document.createElement('div');s.className='shrink';s.innerHTML=`<img src="${IMG.ticket}">`;
+  Object.assign(s.style,{left:'10px',top:'10px',width:(scr.clientWidth-20)+'px',height:(scr.clientHeight-20)+'px'});scr.appendChild(s);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>Object.assign(s.style,{left:'18px',top:(scr.clientHeight-260)+'px',width:'84px',height:'168px'})));
+  setTimeout(()=>{s.style.opacity='0';setTimeout(()=>s.remove(),500);
+    const K=KIND.ticket;
+    $('#heads').innerHTML=`<div class="top"><div class="ic"><i data-lucide="train-front"></i></div><div style="flex:1"><b>Train ticket detected</b><small>Chennai → Bengaluru · Sun 22 Nov, 06:00</small></div><span class="chip" style="background:rgba(52,211,153,.15);color:#34d399">96%</span></div>
+    <div class="acts"><button class="btn p" id="hAdd"><i data-lucide="calendar-plus"></i>Add to calendar</button><button class="btn g" id="hOpen"><i data-lucide="eye"></i>Open</button></div>`;
+    icons();$('#heads').classList.add('on');
+    $('#hAdd').onclick=()=>{$('#heads').classList.remove('on');ITEMS.ticket.status='done';ITEMS.ticket.prev='needs';$('#cTrips').textContent='4 active';renderHome();
+      toast('<b>Added to Calendar</b> · Sun 22 Nov, 06:00 · auto-archives 23 Nov',()=>{ITEMS.ticket.status='needs';renderHome()})};
+    $('#hOpen').onclick=()=>{$('#heads').classList.remove('on');openDetail('ticket')};
+  },1300);
+}
+$('#fab').onclick=capture;
+
+/* ================= sweep ================= */
+const GROUPS=[
+ {k:'otp',name:'Used codes',why:'OTPs older than 1 day. Their job is done.',n:38,mb:46,imgs:['otp','otp','otp']},
+ {k:'done',name:'Finished trips & paid bills',why:'Journeys are over, bills are paid. Details are saved in Collections.',n:21,mb:64,imgs:['ticket','bill','ticket']},
+ {k:'dup',name:'Near-duplicates',why:'Keeping the sharpest copy from each set of lookalikes.',n:112,mb:410,imgs:['meme','meme','meme']},
+ {k:'blur',name:'Accidental & blurry',why:'Lock screens, black frames, blurred captures.',n:17,mb:22,imgs:['event','shop','recipe']}
+];
+let sweepSel=new Set(GROUPS.map(g=>g.k)),swept=false;
+function renderSweep(){
+  if(swept){$('#sweep').innerHTML=`<div class="hdr"><div><small>Week of 16 Nov</small><h2>Sweep</h2></div></div>
+    <div class="glass celebrate" style="padding:26px 18px"><div class="ring" id="ring2" style="margin:0 auto 14px"></div><h4 style="font-size:20px;font-weight:800">Gallery is light again</h4><p style="color:var(--mute);font-size:13px;margin-top:6px;line-height:1.5">${sumN()} screenshots moved to Archive · <b style="color:var(--ink)">${sumMB()} MB</b> freed.<br>You can restore them for 30 days.</p>
+    <button class="pill soft" style="margin-top:16px" id="restore"><i data-lucide="archive-restore"></i>Open archive</button></div>
+    <div class="glass" style="padding:14px;margin-top:12px;font-size:12.5px;color:var(--mute);line-height:1.5"><b style="color:var(--ink)">Next sweep · Sun 22 Nov, 7 PM.</b> We'll only nudge you when there's at least 100 MB to free.</div>`;
+    icons();ring(62,$('#ring2'));setTimeout(()=>{$('#ring2 #rc').style.strokeDashoffset=2*Math.PI*40*(1-.91);let v=62;const st=setInterval(()=>{v++;$('#ring2 #rv').textContent=v;if(v>=91)clearInterval(st)},28)},200);
+    return;}
+  $('#sweep').innerHTML=`<div class="hdr"><div><small>Week of 16 Nov</small><h2>Sweep</h2></div><div class="iconbtn"><i data-lucide="history"></i></div></div>
+   <div style="margin-bottom:18px"><div class="bign" id="mb">${sumMB()} MB</div><p style="color:var(--mute);font-size:13px;margin-top:6px">can be freed by archiving <b style="color:var(--ink)" id="nn">${sumN()}</b> screenshots that have already done their job.</p></div>
+   ${GROUPS.map(g=>`<div class="glass group ${sweepSel.has(g.k)?'':'off'}" data-g="${g.k}"><div class="stack">${g.imgs.map(i=>`<img src="${IMG[i]}">`).join('')}</div>
+    <div class="t"><b>${g.name} · ${g.n}</b><small>${g.why}</small><div class="sz">${g.mb} MB</div></div><div class="check"><i data-lucide="check"></i></div></div>`).join('')}
+   <div class="glass" style="padding:12px 14px;font-size:12px;color:var(--mute);display:flex;gap:10px;align-items:center;margin-bottom:6px"><i data-lucide="shield-check" style="color:var(--ok);flex-shrink:0"></i>Never swept automatically: anything in Collections, starred, or less than 24 hours old.</div>
+   <div class="sweepbar"><button class="bigbtn" id="doSweep"><i data-lucide="sparkles"></i>Archive ${sumN()} · free ${sumMB()} MB</button></div>`;
+  icons();
+  document.querySelectorAll('[data-g]').forEach(el=>el.onclick=()=>{const k=el.dataset.g;sweepSel.has(k)?sweepSel.delete(k):sweepSel.add(k);renderSweep()});
+  $('#doSweep').onclick=()=>{if(!sumN())return;swept=true;confetti();renderSweep();health=91;renderHome();$('#healthTxt').innerHTML=`1,096 screenshots · 2.5 GB<br><b style="color:#34d399">Light.</b> Next sweep on Sunday`};
+}
+const sumN=()=>GROUPS.filter(g=>sweepSel.has(g.k)).reduce((a,g)=>a+g.n,0);
+const sumMB=()=>GROUPS.filter(g=>sweepSel.has(g.k)).reduce((a,g)=>a+g.mb,0);
+function confetti(){const c=$('#confetti');const cols=['#8b5cf6','#ec4899','#f59e0b','#34d399','#38bdf8'];c.innerHTML=Array.from({length:60},(_,i)=>`<i style="left:${Math.random()*100}%;background:${cols[i%5]};animation-delay:${Math.random()*.5}s;animation-duration:${1.4+Math.random()}s"></i>`).join('');setTimeout(()=>c.innerHTML='',2800)}
+
+/* ================= Model Lab (real models) ================= */
+const SAMPLE_BTNS=[['ticket','train-front','Train ticket'],['bill','receipt','Bill'],['otp','key-round','OTP SMS'],['recipe','chef-hat','Recipe'],['event','calendar-days','Event poster'],['shop','heart','Product']];
+$('#samples').innerHTML=SAMPLE_BTNS.map(s=>`<button data-sample="${s[0]}"><i data-lucide="${s[1]}"></i>${s[2]}</button>`).join('');
+$('#samples').onclick=e=>{const b=e.target.closest('[data-sample]');if(b)runLab(IMG[b.dataset.sample],b.dataset.sample)};
+$('#file').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>runLab(r.result,null);r.readAsDataURL(f)};
+function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s)})}
+function toPNG(url){return new Promise((res,rej)=>{const im=new Image();im.onload=()=>{const sc=Math.min(2,1600/Math.max(im.width,im.height))||1;const c=document.createElement('canvas');c.width=im.width*sc;c.height=im.height*sc;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);res(c.toDataURL('image/png'))};im.onerror=rej;im.src=url})}
+let chronoMod=null;
+async function getChrono(){if(chronoMod)return chronoMod;try{chronoMod=await import('https://cdn.jsdelivr.net/npm/chrono-node@2.7.7/+esm')}catch(e){chronoMod=false}return chronoMod}
+function step(id,state,sub,pc){const el=$('#ps-'+id);if(!el)return;el.className='ps '+state;el.querySelector('.st').innerHTML=`<i data-lucide="${state==='ok'?'check':state==='run'?'loader-circle':'circle'}"></i>`;if(sub!=null)el.querySelector('small').textContent=sub;el.querySelector('.pc').textContent=pc||'';icons()}
+let labBusy=false;
+async function runLab(url,sampleKey){
+  if(labBusy)return;labBusy=true;
+  $('#labOut').innerHTML=`<div class="glass pipe">
+    <div class="ps" id="ps-ocr"><div class="st"></div><div class="tx">Read the text<small>Tesseract.js 5 · LSTM · eng</small></div><span class="pc"></span></div>
+    <div class="ps" id="ps-ent"><div class="st"></div><div class="tx">Pull out details<small>chrono-node + regex rules</small></div><span class="pc"></span></div>
+    <div class="ps" id="ps-int"><div class="st"></div><div class="tx">Work out the purpose<small>keyword scorer · on-device</small></div><span class="pc"></span></div>
+    <div class="ps" id="ps-act"><div class="st"></div><div class="tx">Pick the action<small>confidence gate + autonomy</small></div><span class="pc"></span></div></div><div id="labRes"></div>`;
+  ['ocr','ent','int','act'].forEach(s=>step(s,'',null));
+  step('ocr','run','Loading model…');
+  let text='',live=true;const t0=performance.now();
+  try{
+    const png=await toPNG(url);
+    if(!window.Tesseract)await loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js');
+    const job=Tesseract.recognize(png,'eng',{logger:m=>{if(m.status==='recognizing text')step('ocr','run','Recognising text…',Math.round(m.progress*100)+'%');else if(m.status)step('ocr','run',m.status.replace(/tesseract |api /,''))}});
+    const r=await Promise.race([job,new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),60000))]);
+    text=r.data.text.trim();
+  }catch(e){live=false;text=sampleKey?SAMPLE_TEXT[sampleKey]:'';}
+  step('ocr','ok',live?`Tesseract.js · ${text.split(/\s+/).filter(Boolean).length} words`:'Model blocked here · using cached text',((performance.now()-t0)/1000).toFixed(1)+'s');
+  step('ent','run');
+  const ents=await extract(text);
+  step('ent','ok',`${ents.length} details found`);
+  step('int','run');await new Promise(r=>setTimeout(r,350));
+  const {kind,conf,hits}=classify(text);
+  step('int','ok',`${KIND[kind].label} · matched ${hits.slice(0,3).join(', ')||'nothing specific'}`,Math.round(conf*100)+'%');
+  const sens=SENSITIVE.test(text);
+  const mode=sens?'ask':conf>=.85?'auto':conf>=.55?'suggest':'ask';
+  const autonomy=AUTO[kind]||'suggest';
+  const final=sens?'Ask (sensitive)':mode==='auto'&&autonomy==='Auto'?'Do it automatically':mode==='ask'?'Ask what it is for':'Suggest the action';
+  step('act','ok',final);
+  const K=KIND[kind];
+  $('#labRes').innerHTML=`<div class="glass result"><div class="thumb" style="width:54px;height:84px"><img src="${url}"></div><div style="flex:1;display:flex;flex-direction:column;gap:6px">${chip(kind)}${confBar(conf)}
+   <button class="btn p" style="width:fit-content" onclick="toast('<b>${K.done}</b> (demo)')"><i data-lucide="${K.actIcon}"></i>${K.action}</button></div></div>
+   ${sens?`<div class="lock"><i data-lucide="shield-alert"></i><div>Sensitive content detected. Shotlist will never act on this automatically.</div></div>`:''}
+   <div class="ents">${ents.map(e=>`<span><em>${e[0]}</em>${e[1]}</span>`).join('')}</div>
+   <div class="ocr">${text.replace(/</g,'&lt;')||'(no text found)'}</div>
+   <p class="note">${live?'Text read live by Tesseract.js in this browser. The production app uses Google ML Kit text recognition and MobileCLIP image tags on the phone.':'The OCR model could not be downloaded in this viewer, so saved sample text is shown instead. The demo video shows the model reading the screenshot live.'}</p>`;
+  icons();labBusy=false;
+}
+async function extract(text){
+  const out=[];const ch=await getChrono();
+  if(ch){try{(ch.parse?ch.parse(text,new Date(2026,10,18)):[]).filter(r=>r.start.isCertain('day')).slice(0,4).forEach(r=>out.push(['date',r.start.date().toLocaleString('en-IN',{day:'numeric',month:'short',year:'numeric',hour:r.start.isCertain('hour')?'2-digit':undefined,minute:r.start.isCertain('hour')?'2-digit':undefined})]))}catch(e){}}
+  else{(text.match(/\b\d{1,2}\s(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s\d{4}\b/gi)||[]).forEach(d=>out.push(['date',d]))}
+  (text.match(/(?:Rs\.?|₹|INR)\s?[\d,]+(?:\.\d{2})?/gi)||[]).slice(0,3).forEach(m=>out.push(['amount',m]));
+  const otp=text.match(/(?:otp|code)[^\d]{0,25}(\d{4,8})/i);if(otp)out.push(['code',otp[1]]);
+  const pnr=text.match(/PNR\s*[:#]?\s*(\d{10})/i);if(pnr)out.push(['PNR',pnr[1]]);
+  (text.match(/\b[a-z0-9.-]+\.(?:in|com|org|io)(?:\/\S*)?/gi)||[]).slice(0,2).forEach(u=>out.push(['link',u]));
+  (text.match(/\b\d{1,2}:\d{2}\s?(?:AM|PM)?\b/gi)||[]).slice(0,2).forEach(t=>out.push(['time',t]));
+  const seen=new Set();return out.filter(e=>{const k=e[0]+e[1];if(seen.has(k))return false;seen.add(k);return true});
+}
+function classify(text){
+  const t=text.toLowerCase();let best='note',bs=0,hits=[],scores={};
+  for(const k in KIND){const h=KIND[k].kw.filter(w=>t.includes(w));const s=h.length;scores[k]=s;if(s>bs){bs=s;best=k;hits=h}}
+  const second=Math.max(0,...Object.entries(scores).filter(([k])=>k!==best).map(e=>e[1]));
+  let conf=bs===0?.32:Math.min(.98,.45+.09*bs+.06*(bs-second));
+  return {kind:best,conf,hits};
+}
+
+/* ================= autonomy ================= */
+const AUTO={otp:'Auto',ticket:'Suggest',bill:'Suggest',shop:'Suggest',event:'Ask',recipe:'Suggest',meme:'Auto'};
+$('#auto').innerHTML=Object.keys(AUTO).map(k=>{const K=KIND[k];return `<div class="srow"><div class="l"><i data-lucide="${K.icon}" style="color:${K.col}"></i><div>${K.label}s<small>${K.action}</small></div></div><div class="seg" data-k="${k}">${['Ask','Suggest','Auto'].map(m=>`<button class="${AUTO[k]===m?'on':''}">${m}</button>`).join('')}</div></div>`}).join('');
+$('#auto').onclick=e=>{const b=e.target.closest('.seg button');if(!b)return;const seg=b.parentNode;seg.querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');AUTO[seg.dataset.k]=b.textContent;toast(`${KIND[seg.dataset.k].label}s set to <b>${b.textContent}</b>`)};
+document.querySelectorAll('.tgl').forEach(t=>t.onclick=()=>t.classList.toggle('on'));
+
+/* ================= story panel ================= */
+const STEPS=[
+ ['Onboard','Privacy-first permission',()=>{show('onboard');setCaption('Shotlist only asks for the <b>Screenshots folder</b>, and everything runs <b>on the phone</b>.')}],
+ ['Today','Health score + action inbox',()=>{show('home');setCaption('Each screenshot becomes an <b>action card</b> with a confidence score. Low-risk tasks are done for you and can be undone.')}],
+ ['Capture → Act','The moment you screenshot',()=>{show('home');setTimeout(capture,300);setCaption('Take a screenshot and Shotlist recognises a <b>train ticket</b> within a second. One tap adds it to your calendar.')}],
+ ['Sweep','Free space weekly',()=>{renderSweep();show('sweep');setCaption('Screenshots that have done their job are grouped by reason. One tap archives them, and they can be <b>restored for 30 days</b>.')}],
+ ['Model Lab','Real OCR, live',()=>{show('lab');setCaption('Try it with real open-source models: <b>Tesseract.js</b> reads the text and <b>chrono-node</b> finds dates, all in your browser.')}],
+ ['Autonomy','User stays in control',()=>{show('settings');setCaption('Choose <b>Ask, Suggest or Auto</b> for each category. A sensitive-content guard sits above all of these settings.')}]
+];
+$('#steps').innerHTML=STEPS.map((s,i)=>`<button class="step" data-step="${i}"><span class="n">${i+1}</span><div><b>${s[0]}</b><small>${s[1]}</small></div></button>`).join('');
+$('#steps').onclick=e=>{const b=e.target.closest('[data-step]');if(b){const i=+b.dataset.step;if(i>0&&current==='onboard'){}STEPS[i][2]()}};
+function markStep(i){document.querySelectorAll('.step').forEach((s,n)=>s.classList.toggle('on',n===i||(i===2&&n===1&&false)))}
+function setCaption(h){const c=$('#caption');c.style.opacity=0;setTimeout(()=>{c.innerHTML=h;c.style.opacity=1},200)}
+
+/* demo hooks for recording */
+window.demo={show,capture,openDetail,doAction,renderSweep,runLab,IMG,setCaption,openPerm,sheet};
+renderHome();icons();
+</script>
+
+
+</body></html>
