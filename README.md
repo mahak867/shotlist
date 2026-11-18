@@ -23,5 +23,10 @@ The production design plans to use Google ML Kit text recognition, MobileCLIP im
 
 All sample data in the prototype is fictional.
 
-## Team
-Shotlist
+## Team Shotlist
+| | Role |
+|---|---|
+| **Mahak Fahad** | Team leader, backend and AI/ML |
+| **Roshini R** | Frontend and design (UI/UX) |
+
+B.E. Computer Science and Engineering, Chennai Institute of Technology, batch of 2029.
